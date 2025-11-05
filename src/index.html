@@ -1,28 +1,34 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
   <head>
-    <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+    <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="shortcut icon" href="favicon.png">
-
-    <title>App</title>
+    <title>Dicoding Story Map</title>
+    <link rel="shortcut icon" href="favicon.png" />
   </head>
   <body>
+    <!-- Accessibility: Skip to content -->
+    <a href="#main-content" class="skip-link">Skip to content</a>
+
+    <!-- Header Navigation -->
     <header>
       <div class="main-header container">
-        <a class="brand-name" href="#/">App</a>
+        <a href="#/" class="brand-name">Dicoding Story Map</a>
 
-        <nav id="navigation-drawer" class="navigation-drawer">
+        <nav id="navigation-drawer" class="navigation-drawer" aria-label="Navigasi utama">
           <ul id="nav-list" class="nav-list">
             <li><a href="#/">Beranda</a></li>
-            <li><a href="#/about">About</a></li>
+            <li><a href="#/add-story">Tambah Story</a></li>
+            <li><a href="#/about">Tentang</a></li>
+            <li id="user-section"></li>
           </ul>
         </nav>
 
-        <button id="drawer-button" class="drawer-button">☰</button>
+        <button id="drawer-button" class="drawer-button" aria-label="Toggle navigasi">☰</button>
       </div>
     </header>
 
-    <main id="main-content" class="main-content"></main>
+    <!-- Main Content -->
+    <main id="main-content" class="main-content" tabindex="-1"></main>
   </body>
 </html>

@@ -1,20 +1,39 @@
+/* Reset and base */
 * {
   margin: 0;
   padding: 0;
-
   box-sizing: border-box;
 }
 
 body {
   font-family: 'Arial', sans-serif;
+  background-color: #fafafa;
+  color: #222;
+  line-height: 1.5;
 }
 
+/* Layout containers */
 .container {
-  padding-inline: 32px;
+  padding-inline: 1.5rem;
+  max-width: 1200px;
   margin-inline: auto;
-  max-width: 1300px;
 }
 
+.page {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fadeIn 0.4s forwards;
+  margin-block: 1rem 2rem;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Header + Navigation */
 header {
   background-color: lightskyblue;
 }
@@ -22,34 +41,30 @@ header {
 .main-header {
   min-height: 90px;
   padding-block: 20px;
-
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 30px;
+  gap: 20px;
 }
 
 .brand-name {
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   font-weight: bold;
   text-decoration: none;
-  color: #333;
+  color: #111;
 }
 
 .navigation-drawer {
   min-height: 100vh;
-  width: 200px;
-  padding: 20px 10px;
+  width: 220px;
+  padding: 20px;
   background-color: #fff;
-
   position: fixed;
   inset-block-start: 0;
   inset-inline-start: 0;
-
-  box-shadow: 0 0 4px 2px #00000033;
+  box-shadow: 0 0 6px #00000033;
   transform: translateX(-100%);
-  transition: transform 350ms;
-
+  transition: transform 0.3s;
   z-index: 9999;
 }
 
@@ -58,71 +73,158 @@ header {
 }
 
 .drawer-button {
-  padding: 8px;
-  border: 0;
-  border-radius: 4px;
-
-  display: inline-block;
-  background-color: transparent;
-
-  font-weight: bold;
+  border: none;
+  background: transparent;
   font-size: 28px;
-  color: #141e16;
-
   cursor: pointer;
 }
 
 .nav-list {
   list-style: none;
-
   display: flex;
   flex-direction: column;
-  gap: 10px 20px;
+  gap: 15px;
 }
 
-.nav-list li a {
-  padding: 6px 10px;
-
-  display: block;
-  
-  color: #333;
+.nav-list a {
   text-decoration: none;
+  color: #222;
+  font-weight: 500;
 }
 
-.nav-list li a:hover {
+.nav-list a:hover {
   text-decoration: underline;
 }
 
-/* MAIN */
+/* Main content */
 .main-content {
   padding-block: 20px;
 }
 
-/* Write your styles more here */
+/* --- STORY GRID LAYOUT --- */
+.story-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 1.5rem;
+}
 
-@media screen and (width > 1000px) {
+/* Each story card */
+.story-card {
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.story-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 3px 6px rgba(0,0,0,0.15);
+}
+
+.story-card img {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+}
+
+.story-card h3 {
+  font-size: 1rem;
+  margin: 0.5rem 0;
+  color: #222;
+}
+
+.story-card p {
+  font-size: 0.85rem;
+  color: #444;
+  flex-grow: 1;
+}
+
+.story-card small {
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.story-card a {
+  color: #007bff;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.story-card a:hover {
+  text-decoration: underline;
+}
+
+
+/* Map layout fix */
+#map {
+  width: 100%;
+  max-width: 100%;
+  height: 400px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-block: 1rem;
+}
+
+/* Forms */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+input, textarea, button {
+  font-size: 1rem;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #bbb;
+}
+
+button {
+  background-color: lightskyblue;
+  border: none;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: deepskyblue;
+  color: white;
+}
+
+/* Skip link accessibility */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #000;
+  color: #fff;
+  padding: 8px;
+  z-index: 100;
+}
+.skip-link:focus {
+  top: 0;
+}
+
+/* Responsive */
+@media (width > 1000px) {
   .navigation-drawer {
+    position: static;
+    transform: translateX(0);
+    background: transparent;
+    box-shadow: none;
     min-height: auto;
     width: auto;
     padding: 0;
-    background-color: transparent;
-
-    flex-direction: row;
-    justify-content: space-between;
-
-    position: static;
-    box-shadow: none;
-    transform: translateX(0);
   }
-
   .nav-list {
     flex-direction: row;
   }
-
-  .nav-list li a {
-    display: inline-block;
-  }
-
   .drawer-button {
     display: none;
   }
