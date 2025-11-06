@@ -1,6 +1,13 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { getAllStories } from '../../data/api.js';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+L.Icon.Default.mergeOptions({
+  iconUrl: markerIcon,
+  shadowUrl: markerShadow,
+});
 
 export default class HomePage {
   async render() {
@@ -19,27 +26,29 @@ export default class HomePage {
     const mapContainer = document.getElementById('map');
     list.innerHTML = '';
 
-    // ✅ Initialize map only once per render
-    const map = L.map(mapContainer).setView([-2.5, 118], 5);
+    const map = L.map(mapContainer, {
+      zoomControl: true,
+      scrollWheelZoom: true,
+      minZoom: 2,
+      maxZoom: 16,
+      maxBounds: [[85, -180], [-85, 180]],
+      maxBoundsViscosity: 1.0,
+    }).setView([-2.5, 118], 5);
 
-    // ✅ Fix tile mismatch by using correct retina-safe URL
     const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       maxZoom: 18,
       detectRetina: true,
       attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
     }).addTo(map);
 
-    // ✅ Add alternative layer for advanced criteria
     const topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
       maxZoom: 17,
       attribution: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a> contributors',
     });
     L.control.layers({ Default: osm, Topographic: topo }).addTo(map);
 
-    // ✅ Important: revalidate map size after SPA transition
     setTimeout(() => map.invalidateSize(), 400);
 
-    // ✅ Display story list and markers
     if (!stories.length) {
       list.innerHTML = '<p>Tidak ada story ditemukan.</p>';
       return;
@@ -52,7 +61,11 @@ export default class HomePage {
         <img src="${s.photoUrl}" alt="Foto oleh ${s.name}">
         <h3>${s.name}</h3>
         <p>${s.description}</p>
-        <small>${new Date(s.createdAt).toLocaleString('id-ID')}</small><br>
+        ${
+          s.lat && s.lon 
+            ? `<small>Lokasi: ${s.lat.toFixed(4)}, ${s.lon.toFixed(4)}</small><br>`
+            : `<small>Tidak ada lokasi</small><br>`
+        }
         <a href="#/story/${s.id}">Lihat Detail</a>`;
       list.appendChild(article);
 
@@ -62,7 +75,6 @@ export default class HomePage {
       }
     });
 
-    // ✅ Fit map to visible markers
     const markers = stories.filter(s => s.lat && s.lon).map(s => [s.lat, s.lon]);
     if (markers.length) {
       const bounds = L.latLngBounds(markers);

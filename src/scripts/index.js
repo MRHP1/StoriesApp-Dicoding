@@ -1,6 +1,7 @@
 import '../styles/styles.css';
 import App from './pages/app.js';
 import { getUserData, logoutUser } from './utils/index.js';
+import { showLoader, hideLoader } from './utils/index.js';
 
 document.addEventListener('DOMContentLoaded', async () => {
   const app = new App({
@@ -31,12 +32,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     window.location.hash = '#/login';
   }
 
-  const render = () =>
-    document.startViewTransition
-      ? document.startViewTransition(() => app.renderPage())
-      : app.renderPage();
+    const render = async () => {
+      showLoader();
 
-  await render();
+      const run = () => app.renderPage();
+
+      if (document.startViewTransition) {
+        await document.startViewTransition(run).finished;
+      } else {
+        await run();
+      }
+
+      hideLoader();
+    };
+
+    await render();
 
   window.addEventListener('hashchange', async () => {
     const { token } = getUserData();

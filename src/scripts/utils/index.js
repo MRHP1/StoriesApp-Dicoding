@@ -25,3 +25,11 @@ export function showFormattedDate(date, locale = 'en-US', options = {}) {
 export function sleep(time = 1000) {
   return new Promise((resolve) => setTimeout(resolve, time));
 }
+
+export function showLoader() {
+  document.getElementById('loader')?.classList.remove('hidden');
+}
+
+export function hideLoader() {
+  document.getElementById('loader')?.classList.add('hidden');
+}
