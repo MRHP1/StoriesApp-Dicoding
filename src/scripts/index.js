@@ -15,19 +15,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (token && name) {
     userSection.innerHTML = `
-      <span>Hai, <b>${name}</b></span>
-      <button id="logout-btn" style="margin-left:8px;">Logout</button>
+      <span>👋 Hi, <b>${name}</b></span>
+      <button id="logout-btn" class="logout-btn">Logout</button>
     `;
     document.querySelector('#logout-btn').addEventListener('click', logoutUser);
   } else {
     userSection.innerHTML = `
       <a href="#/login">Login</a> |
       <a href="#/register">Register</a>
+      <small>(Guest Mode)</small>
     `;
   }
-
+ 
   // --- Protect routes ---
-  const protectedRoutes = ['#/', '#/about', '#/add-story'];
+  const protectedRoutes = ['#/', '#/add-story'];
   if (!token && protectedRoutes.includes(window.location.hash)) {
     window.location.hash = '#/login';
   }
@@ -51,6 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.addEventListener('hashchange', async () => {
     const { token } = getUserData();
     if (!token && protectedRoutes.includes(window.location.hash)) {
+      alert("Silakan login untuk menambah story.");
       window.location.hash = '#/login';
       return;
     }

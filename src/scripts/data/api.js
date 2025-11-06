@@ -34,23 +34,21 @@ export async function loginUser(email, password) {
 export async function getAllStories() {
   const token = localStorage.getItem('token');
 
-  if (!token) {
-    alert('Silakan login untuk melihat stories.');
-    window.location.hash = '#/login';
+  const res = await fetch(`${CONFIG.BASE_URL}/stories?page=1&size=100&location=1`, {
+    headers: token ? { Authorization: `Bearer ${token}` } : {}
+  });
+
+  let json;
+  try {
+    json = await res.json();
+  } catch {
+    alert("⚠️ Gagal memuat data story. Periksa koneksi / API.");
     return [];
   }
 
-  try {
-    showLoader();
-    const res = await fetch(`${CONFIG.BASE_URL}/stories?page=1&size=100&location=1`, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    const json = await res.json();
-    return json.listStory || [];
-  } finally {
-    hideLoader();
-  }
+  return json.listStory || [];
 }
+
 
 export async function getStoryDetail(id) {
   try {
