@@ -19,7 +19,7 @@ export default class DetailStoryPage {
 
     const c = document.querySelector('#story-detail');
     c.innerHTML = `
-      <h2>${s.name}</h2>
+      <h1>${s.name}</h1>
       <img src="${s.photoUrl}" alt="Foto story oleh ${s.name}" style="width:100%;border-radius:8px;">
       <p>${s.description}</p>
       ${
@@ -29,7 +29,6 @@ export default class DetailStoryPage {
       }
     `;
 
-    // Only show map if coords exist
     if (!(s.lat && s.lon)) return;
 
     const map = L.map('detail-map').setView([s.lat, s.lon], 13);

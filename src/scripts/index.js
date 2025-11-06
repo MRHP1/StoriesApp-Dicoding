@@ -2,6 +2,11 @@ import '../styles/styles.css';
 import App from './pages/app.js';
 import { getUserData, logoutUser } from './utils/index.js';
 import { showLoader, hideLoader } from './utils/index.js';
+import 'leaflet/dist/leaflet.css';
+import { fixLeafletIcons } from './utils/map-icons.js';
+
+fixLeafletIcons();
+
 
 document.addEventListener('DOMContentLoaded', async () => {
   const app = new App({

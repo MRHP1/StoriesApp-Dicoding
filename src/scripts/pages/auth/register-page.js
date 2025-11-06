@@ -6,12 +6,12 @@ export default class RegisterPage {
       <section class="container page">
         <h1>Daftar</h1>
         <form id="register-form">
-          <label>Nama:</label>
-          <input id="name" type="text" required>
-          <label>Email:</label>
-          <input id="email" type="email" required>
-          <label>Password:</label>
-          <input id="password" type="password" required minlength="8">
+          <label for="name">Nama:</label>
+          <input id="name" name="name" type="text" required>
+          <label for="email">Email:</label>
+          <input id="email" name="email" type="email" required>
+          <label for="password">Password:</label>
+          <input id="password" name="password" type="password" required minlength="8">
           <button type="submit">Daftar</button>
         </form>
       </section>`;

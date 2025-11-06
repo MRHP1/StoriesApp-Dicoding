@@ -13,21 +13,25 @@ export default class AddStoryPage {
           <label for="description">Deskripsi:</label>
           <textarea id="description" required></textarea>
 
-          <label>Upload Foto:</label>
+          <label for="photo-file">Upload Foto:</label>
+          <input id="photo-file" name="photo-file" type="file" accept="image/*" style="display:none;">
+
           <div class="upload-switch">
             <button type="button" id="use-camera">📷 Kamera</button>
             <button type="button" id="use-file">🖼️ File</button>
           </div>
 
           <!-- Real-Time Camera Section -->
+          <p id="camera-label">Ambil foto dengan kamera:</p>
           <div id="camera-section" style="display:none; margin-top:10px;">
             <video id="camera-stream" autoplay playsinline style="width:100%; border-radius:8px;"></video>
             <button type="button" id="capture-btn" style="margin-top:8px;">📸 Ambil Foto</button>
           </div>
 
           <!-- File Upload Fallback -->
-          <input id="photo-file" type="file" accept="image/*" style="display:none;">
-
+          <label for="photo-file">Upload Foto (File):</label>
+          <input id="photo-file" name="photo-file" type="file" accept="image/*" style="display:none;">
+          
           <p>Pilih lokasi pada peta atau gunakan lokasi saya:</p>
           <button type="button" id="locate-me">📍 Gunakan Lokasi Saya</button>
 

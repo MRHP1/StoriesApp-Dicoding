@@ -1,13 +1,13 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { getAllStories } from '../../data/api.js';
-import markerIcon from 'leaflet/dist/images/marker-icon.png';
-import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+// import markerIcon from 'leaflet/dist/images/marker-icon.png';
+// import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
-L.Icon.Default.mergeOptions({
-  iconUrl: markerIcon,
-  shadowUrl: markerShadow,
-});
+// L.Icon.Default.mergeOptions({
+//   iconUrl: markerIcon,
+//   shadowUrl: markerShadow,
+// });
 
 export default class HomePage {
   async render() {
