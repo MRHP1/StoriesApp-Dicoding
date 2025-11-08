@@ -146,6 +146,10 @@ export default class AddStoryPage {
 
       if (!res.error) {
         alert('Story berhasil ditambahkan!');
+        new Notification("Story kamu berhasil diunggah!", {
+          body: desc,
+          icon: "/favicon.png"
+        });
         if (stream) stream.getTracks().forEach(t => t.stop());
         window.location.hash = '#/';
         setTimeout(() => window.location.reload(), 300);

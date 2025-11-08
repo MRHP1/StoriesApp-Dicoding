@@ -8,19 +8,17 @@ import { isSubscribed, subscribePush, unsubscribePush } from './utils/push-manag
 
 fixLeafletIcons();
 
+// ---------------- PUSH BUTTON UI ----------------
 async function renderPushButton() {
   const pushSection = document.getElementById('push-section');
-  if (!pushSection) return; // safety: tombol tidak dibuat jika elemen belum ada
+  if (!pushSection) return;
 
-  // Pastikan browser mendukung push
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
     pushSection.innerHTML = `<small>Push Not Supported</small>`;
     return;
   }
 
-  // Pastikan SW sudah aktif
   await navigator.serviceWorker.ready;
-
   const subscribed = await isSubscribed();
 
   pushSection.innerHTML = `
@@ -45,10 +43,11 @@ async function renderPushButton() {
       await subscribePush();
     }
 
-    renderPushButton(); // refresh UI
+    renderPushButton();
   };
 }
 
+// ---------------- MAIN APP ----------------
 document.addEventListener('DOMContentLoaded', async () => {
   const app = new App({
     content: document.querySelector('#main-content'),
@@ -56,7 +55,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     navigationDrawer: document.querySelector('#navigation-drawer'),
   });
 
-  // Register SW
+  // Register Service Worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/service-worker.js')
       .then(() => console.log('SW Registered'))
@@ -66,13 +65,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   const { name, token } = getUserData();
   const userSection = document.querySelector('#user-section');
 
-  // Render user login/logout state
+  // User login state UI
   if (token && name) {
     userSection.innerHTML = `
       <span>👋 Hi, <b>${name}</b></span>
       <button id="logout-btn" class="logout-btn">Logout</button>
     `;
     document.querySelector('#logout-btn').addEventListener('click', logoutUser);
+
+    // ✅ Auto-subscribe setelah login (jika belum)
+    if (!(await isSubscribed())) {
+      subscribePush();
+    }
+
   } else {
     userSection.innerHTML = `
       <a href="#/login">Login</a> |
@@ -81,13 +86,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     `;
   }
 
-  // Route Protection
+  // Protected routes
   const protectedRoutes = ['#/', '#/add-story'];
   if (!token && protectedRoutes.includes(window.location.hash)) {
     window.location.hash = '#/login';
   }
 
-  // Page Renderer
+  // SPA renderer
   const render = async () => {
     showLoader();
     const run = () => app.renderPage();
@@ -102,7 +107,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   };
 
   await render();
-  await renderPushButton(); // ⬅ tampilkan tombol pertama kali
+  await renderPushButton();
 
   window.addEventListener('hashchange', async () => {
     const { token } = getUserData();
@@ -113,6 +118,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     await render();
-    await renderPushButton(); // ⬅ update tombol setelah pindah halaman
+    await renderPushButton();
   });
 });
