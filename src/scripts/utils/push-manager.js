@@ -4,34 +4,34 @@ const VAPID_PUBLIC_KEY =
 function urlBase64ToUint8Array(base64) {
   const padding = "=".repeat((4 - (base64.length % 4)) % 4);
   const base64Safe = (base64 + padding).replace(/-/g, "+").replace(/_/g, "/");
-  const raw = atob(base64Safe);
+  const raw = window.atob(base64Safe);
   const output = new Uint8Array(raw.length);
   for (let i = 0; i < raw.length; ++i) output[i] = raw.charCodeAt(i);
   return output;
 }
 
 export async function isSubscribed() {
-  const registration = await navigator.serviceWorker.ready;
-  return Boolean(await registration.pushManager.getSubscription());
+  const reg = await navigator.serviceWorker.ready;
+  return Boolean(await reg.pushManager.getSubscription());
 }
 
 export async function subscribePush() {
-  const registration = await navigator.serviceWorker.ready;
+  const reg = await navigator.serviceWorker.ready;
 
-  const subscription = await registration.pushManager.subscribe({
+  const subscription = await reg.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
   });
 
-  console.log("📌 Subscription Browser:", subscription.toJSON());
+  console.log("📌 Browser Subscription:", subscription);
 
-  const { endpoint, keys } = subscription.toJSON();
   const token = localStorage.getItem("token");
+  if (!token) return;
 
-  if (!token) {
-    alert("Login dulu untuk enable notifikasi.");
-    return;
-  }
+  const payload = {
+    endpoint: subscription.endpoint,
+    keys: subscription.toJSON().keys,
+  };
 
   await fetch("https://story-api.dicoding.dev/v1/notifications/subscribe", {
     method: "POST",
@@ -39,18 +39,20 @@ export async function subscribePush() {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ endpoint, keys }),
+    body: JSON.stringify(payload),
   });
 
-  alert("✅ Notifikasi berhasil diaktifkan");
+  alert("✅ Notifikasi diaktifkan");
 }
 
 export async function unsubscribePush() {
-  const registration = await navigator.serviceWorker.ready;
-  const subscription = await registration.pushManager.getSubscription();
+  const reg = await navigator.serviceWorker.ready;
+  const subscription = await reg.pushManager.getSubscription();
   const token = localStorage.getItem("token");
 
   if (!subscription) return;
+
+  const payload = { endpoint: subscription.endpoint };
 
   await fetch("https://story-api.dicoding.dev/v1/notifications/subscribe", {
     method: "DELETE",
@@ -58,7 +60,7 @@ export async function unsubscribePush() {
       "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
-    body: JSON.stringify({ endpoint: subscription.endpoint }),
+    body: JSON.stringify(payload),
   });
 
   await subscription.unsubscribe();

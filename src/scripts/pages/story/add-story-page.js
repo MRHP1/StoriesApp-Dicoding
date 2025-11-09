@@ -143,7 +143,7 @@ export default class AddStoryPage {
 
       if (!res.error) {
         alert('Story berhasil ditambahkan!');
-        new Notification("Story kamu berhasil diunggah!", {
+        new Notification("Lihat story terbaru kamu: ", {
           body: desc,
           icon: "/favicon.png"
         });
