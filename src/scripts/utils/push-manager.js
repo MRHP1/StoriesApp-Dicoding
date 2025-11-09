@@ -28,9 +28,14 @@ export async function subscribePush() {
   const token = localStorage.getItem("token");
   if (!token) return;
 
+  const sub = subscription.toJSON();
+
   const payload = {
-    endpoint: subscription.endpoint,
-    keys: subscription.toJSON().keys,
+    endpoint: sub.endpoint,
+    keys: {
+      auth: sub.keys.auth,
+      p256dh: sub.keys.p256dh
+    }
   };
 
   await fetch("https://story-api.dicoding.dev/v1/notifications/subscribe", {
@@ -54,7 +59,7 @@ export async function unsubscribePush() {
 
   const payload = { endpoint: subscription.endpoint };
 
-  await fetch("https://story-api.dicoding.dev/v1/notifications/subscribe", {
+  const res = await fetch("https://story-api.dicoding.dev/v1/notifications/subscribe", {
     method: "DELETE",
     headers: {
       "Content-Type": "application/json",
@@ -63,6 +68,9 @@ export async function unsubscribePush() {
     body: JSON.stringify(payload),
   });
 
+  console.log("🔻 Response DELETE:", await res.json());
+
   await subscription.unsubscribe();
   alert("🚫 Notifikasi dimatikan");
 }
+
