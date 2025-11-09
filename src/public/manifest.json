@@ -1,0 +1,29 @@
+{
+  "name": "Dicoding Story Map",
+  "short_name": "Story Map",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#363062",
+  "theme_color": "#363062",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/icon-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "screenshots": [
+  {
+    "src": "/screenshot1.jpg",
+    "sizes": "1280x720",
+    "type": "image/png",
+    "form_factor": "wide"
+  }
+]
+
+}

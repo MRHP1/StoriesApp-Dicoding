@@ -13,9 +13,10 @@ async function renderPushButton() {
   const pushSection = document.getElementById('push-section');
   if (!pushSection) return;
 
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
-    pushSection.innerHTML = `<small>Push Not Supported</small>`;
-    return;
+  if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/service-worker.js')
+      .then(() => console.log('SW Registered'))
+      .catch(err => console.log('SW Failed:', err));
   }
 
   await navigator.serviceWorker.ready;
@@ -61,6 +62,23 @@ document.addEventListener('DOMContentLoaded', async () => {
       .then(() => console.log('SW Registered'))
       .catch(err => console.log('SW Failed:', err));
   }
+
+  let deferredPrompt;
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    console.log("✅ App installable");
+  });
+
+  document.addEventListener('click', async (e) => {
+    if (e.target.id === 'install-btn' && deferredPrompt) {
+      deferredPrompt.prompt();
+      const choice = await deferredPrompt.userChoice;
+      console.log("User install choice:", choice.outcome);
+      deferredPrompt = null;
+    }
+  });
 
   const { name, token } = getUserData();
   const userSection = document.querySelector('#user-section');

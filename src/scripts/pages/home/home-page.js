@@ -1,53 +1,56 @@
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { getAllStories } from '../../data/api.js';
-// import markerIcon from 'leaflet/dist/images/marker-icon.png';
-// import markerShadow from 'leaflet/dist/images/marker-shadow.png';
-
-// L.Icon.Default.mergeOptions({
-//   iconUrl: markerIcon,
-//   shadowUrl: markerShadow,
-// });
+import { formatDate } from '../../utils/time.js';
 
 export default class HomePage {
   async render() {
     return `
       <section class="container page">
-        <h1>Beranda</h1>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <h1>Beranda</h1>
+          <span id="net-status" class="status-badge">Checking...</span>
+        </div>
+
+        <small id="last-reload" style="color:#666;"></small>
+
         <p>Daftar Story dari pengguna Dicoding.</p>
+
         <div id="map" style="height: 400px; margin-top: 1rem; border-radius: 8px; overflow: hidden;"></div>
         <div id="story-list" class="story-list" style="margin-top: 1.5rem;"></div>
       </section>`;
   }
 
   async afterRender() {
-    const stories = await getAllStories();
+    const { source, stories } = await getAllStories();  // ✅ perbarui
     const list = document.querySelector('#story-list');
     const mapContainer = document.getElementById('map');
+    const netStatus = document.getElementById('net-status');
+    const reloadLabel = document.getElementById('last-reload');
+
+    reloadLabel.textContent = `Last reload: ${new Date().toLocaleString('id-ID')} (${source === "online" ? "🌍 Online API" : "💾 Offline Cache"})`;
+
+
+    // 🌐 Update UI: online / offline status
+    function updateNetworkState() {
+      netStatus.textContent = navigator.onLine ? "Online ✅" : "Offline ⚠";
+      netStatus.style.color = navigator.onLine ? "green" : "red";
+    }
+    updateNetworkState();
+    window.addEventListener('online', updateNetworkState);
+    window.addEventListener('offline', updateNetworkState);
+
     list.innerHTML = '';
 
-    const map = L.map(mapContainer, {
-      zoomControl: true,
-      scrollWheelZoom: true,
-      minZoom: 2,
-      maxZoom: 16,
-      maxBounds: [[85, -180], [-85, 180]],
-      maxBoundsViscosity: 1.0,
-    }).setView([-2.5, 118], 5);
+    // 🌍 MAP
+    const map = L.map(mapContainer).setView([-2.5, 118], 5);
 
-    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 18,
-      detectRetina: true,
-      attribution: '&copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors',
-    }).addTo(map);
+    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+    const topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png');
 
-    const topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-      maxZoom: 17,
-      attribution: '&copy; <a href="https://opentopomap.org">OpenTopoMap</a> contributors',
-    });
-    L.control.layers({ Default: osm, Topographic: topo }).addTo(map);
-
-    setTimeout(() => map.invalidateSize(), 400);
+    L.control.layers({ OSM: osm, Topografi: topo }).addTo(map);
+    setTimeout(() => map.invalidateSize(), 300);
 
     if (!stories.length) {
       list.innerHTML = '<p>Tidak ada story ditemukan.</p>';
@@ -57,16 +60,22 @@ export default class HomePage {
     stories.forEach((s) => {
       const article = document.createElement('article');
       article.className = 'story-card';
+
       article.innerHTML = `
         <img src="${s.photoUrl}" alt="Foto oleh ${s.name}">
         <h3>${s.name}</h3>
         <p>${s.description}</p>
+
+        <small>📅 ${formatDate(s.createdAt)}</small><br>
         ${
           s.lat && s.lon 
-            ? `<small>Lokasi: ${s.lat.toFixed(4)}, ${s.lon.toFixed(4)}</small><br>`
-            : `<small>Tidak ada lokasi</small><br>`
+            ? `<small>📍 ${s.lat.toFixed(4)}, ${s.lon.toFixed(4)}</small>`
+            : `<small>Tidak ada lokasi</small>`
         }
-        <a href="#/story/${s.id}">Lihat Detail</a>`;
+        <br>
+        <a href="#/story/${s.id}">Lihat Detail</a>
+      `;
+
       list.appendChild(article);
 
       if (s.lat && s.lon) {
@@ -75,10 +84,9 @@ export default class HomePage {
       }
     });
 
-    const markers = stories.filter(s => s.lat && s.lon).map(s => [s.lat, s.lon]);
-    if (markers.length) {
-      const bounds = L.latLngBounds(markers);
-      map.fitBounds(bounds, { padding: [30, 30] });
-    }
+    const bounds = L.latLngBounds(
+      stories.filter(s => s.lat && s.lon).map(s => [s.lat, s.lon])
+    );
+    if (bounds.isValid()) map.fitBounds(bounds, { padding: [30, 30] });
   }
 }

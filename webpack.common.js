@@ -28,6 +28,18 @@ module.exports = {
           from: path.resolve(__dirname, 'src/public/'),
           to: path.resolve(__dirname, 'dist/'),
         },
+        {
+          from: path.resolve(__dirname, 'src/public/manifest.json'),
+          to: path.resolve(__dirname, 'dist/'),
+        },
+        {
+          from: path.resolve(__dirname, 'src/public/icon-192.png'),
+          to: path.resolve(__dirname, 'dist/'),
+        },
+        {
+          from: path.resolve(__dirname, 'src/public/icon-512.png'),
+          to: path.resolve(__dirname, 'dist/'),
+        },
       ],
     }),
   ],

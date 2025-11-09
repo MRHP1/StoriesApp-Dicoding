@@ -1,5 +1,6 @@
 import CONFIG from '../config.js';
 import { showLoader, hideLoader } from '../utils/index.js';
+import { saveStories, getAllStoredStories } from './indexeddb.js';
 
 // ---------- AUTH ----------
 export async function registerUser(name, email, password) {
@@ -34,19 +35,24 @@ export async function loginUser(email, password) {
 export async function getAllStories() {
   const token = localStorage.getItem('token');
 
-  const res = await fetch(`${CONFIG.BASE_URL}/stories?page=1&size=100&location=1`, {
-    headers: token ? { Authorization: `Bearer ${token}` } : {}
-  });
-
-  let json;
   try {
-    json = await res.json();
-  } catch {
-    alert("⚠️ Gagal memuat data story. Periksa koneksi / API.");
-    return [];
+    const res = await fetch(`${CONFIG.BASE_URL}/stories?page=1&size=100&location=1`, {
+      headers: token ? { Authorization: `Bearer ${token}` } : {}
+    });
+
+    const json = await res.json();
+
+    if (!json.error && json.listStory) {
+      await saveStories(json.listStory); // ✅ simpan ke IndexedDB
+      return { source: "online", stories: json.listStory };
+    }
+
+  } catch (err) {
+    console.warn("⚠ Offline: mengambil dari IndexedDB");
   }
 
-  return json.listStory || [];
+  const stored = await getAllStoredStories();
+  return { source: "offline", stories: stored };
 }
 
 
