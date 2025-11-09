@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     `;
   }
 
-  const protectedRoutes = ['#/', '#/add-story'];
+  const protectedRoutes = ['#/add-story'];
   if (!token && protectedRoutes.includes(window.location.hash)) {
     window.location.hash = '#/login';
   }
