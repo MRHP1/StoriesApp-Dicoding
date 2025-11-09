@@ -31,7 +31,6 @@ export default class DetailStoryPage {
 
     if (!(s.lat && s.lon)) return;
 
-    // --- MAP DETAIL ---
     const map = L.map('detail-map', {
       minZoom: 2,
       maxZoom: 16,

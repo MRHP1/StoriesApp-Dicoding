@@ -47,7 +47,6 @@ export default class AddStoryPage {
     import('leaflet/dist/images/marker-icon.png');
     import('leaflet/dist/images/marker-shadow.png');
 
-    // --- MAP ---
     const map = L.map('map', {
       minZoom: 2,
       maxZoom: 16,
@@ -83,7 +82,6 @@ export default class AddStoryPage {
       );
     });
 
-    // --- REAL-TIME CAMERA SETUP ---
     const cameraBtn = document.querySelector('#use-camera');
     const fileBtn = document.querySelector('#use-file');
     const cameraSection = document.querySelector('#camera-section');
@@ -126,7 +124,6 @@ export default class AddStoryPage {
       }, 'image/jpeg', 0.9);
     });
 
-    // --- SUBMIT FORM ---
     document.querySelector('#story-form').addEventListener('submit', async (e) => {
       e.preventDefault();
 

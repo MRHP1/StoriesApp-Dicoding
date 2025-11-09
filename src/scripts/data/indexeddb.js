@@ -26,6 +26,7 @@ export async function getAllStoredStories() {
 }
 
 export async function deleteStory(id) {
-  const db = await dbPromise;
-  return db.delete(STORE_NAME, id);
+  const db = await getDB();
+  await db.delete(STORE_NAME, id);
+  console.log(`🗑️ Story ${id} dihapus dari IndexedDB`);
 }

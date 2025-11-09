@@ -11,7 +11,6 @@ export default class HomePage {
 
         <div style="display:flex;justify-content:space-between;align-items:center;">
           <h1>Beranda</h1>
-          <span id="net-status" class="status-badge">Checking...</span>
         </div>
 
         <small id="last-reload" style="color:#666;"></small>
@@ -24,7 +23,7 @@ export default class HomePage {
   }
 
   async afterRender() {
-    const { source, stories } = await getAllStories();  // ✅ perbarui
+    const { source, stories } = await getAllStories();
     const list = document.querySelector('#story-list');
     const mapContainer = document.getElementById('map');
     const netStatus = document.getElementById('net-status');
@@ -34,13 +33,12 @@ export default class HomePage {
 
     list.innerHTML = '';
 
-    // --- MAP DETAIL ---
-    const map = L.map('detail-map', {
+    const map = L.map(mapContainer, {
       minZoom: 2,
       maxZoom: 16,
       maxBounds: [[85, -180], [-85, 180]],
       maxBoundsViscosity: 1.0,
-    }).setView([s.lat, s.lon], 13);
+    }).setView([-2.5, 118], 5);
 
     const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       detectRetina: true,
@@ -53,11 +51,8 @@ export default class HomePage {
 
     L.control.layers({ OSM: osm, Topografi: topo }).addTo(map);
 
-    L.marker([s.lat, s.lon]).addTo(map).bindPopup(`
-      <b>${s.name}</b><br>${s.description}
-    `);
-
     setTimeout(() => map.invalidateSize(), 300);
+
 
     if (!stories.length) {
       list.innerHTML = '<p>Tidak ada story ditemukan.</p>';

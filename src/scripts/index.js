@@ -8,18 +8,17 @@ import { isSubscribed, subscribePush, unsubscribePush } from './utils/push-manag
 
 fixLeafletIcons();
 
-// ---------------- PUSH BUTTON UI ----------------
 async function renderPushButton() {
   const pushSection = document.getElementById('push-section');
   if (!pushSection) return;
 
-  if (process.env.NODE_ENV === 'production' && 'serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/service-worker.js')
-      .then(() => console.log('SW Registered'))
-      .catch(err => console.log('SW Failed:', err));
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
+    pushSection.innerHTML = `<small>Push Not Supported</small>`;
+    return;
   }
 
-  await navigator.serviceWorker.ready;
+  const registration = await navigator.serviceWorker.ready;
+
   const subscribed = await isSubscribed();
 
   pushSection.innerHTML = `
@@ -38,11 +37,17 @@ async function renderPushButton() {
       return;
     }
 
+    if (await isSubscribed()) {
+      await unsubscribePush();
+    } else {
+      await subscribePush();
+    }
+
     renderPushButton();
   };
 }
 
-// ---------------- MAIN APP ----------------
+
 document.addEventListener('DOMContentLoaded', async () => {
   const app = new App({
     content: document.querySelector('#main-content'),
@@ -50,7 +55,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     navigationDrawer: document.querySelector('#navigation-drawer'),
   });
 
-  // Register Service Worker
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/service-worker.js')
       .then(() => console.log('SW Registered'))
@@ -77,18 +81,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   const { name, token } = getUserData();
   const userSection = document.querySelector('#user-section');
 
-  // User login state UI
   if (token && name) {
     userSection.innerHTML = `
       <span>👋 Hi, <b>${name}</b></span>
       <button id="logout-btn" class="logout-btn">Logout</button>
     `;
     document.querySelector('#logout-btn').addEventListener('click', logoutUser);
-
-    // ✅ Auto-subscribe setelah login (jika belum)
-    if (!(await isSubscribed())) {
-      subscribePush();
-    }
 
   } else {
     userSection.innerHTML = `
@@ -98,13 +96,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     `;
   }
 
-  // Protected routes
   const protectedRoutes = ['#/', '#/add-story'];
   if (!token && protectedRoutes.includes(window.location.hash)) {
     window.location.hash = '#/login';
   }
 
-  // SPA renderer
   const render = async () => {
     showLoader();
     const run = () => app.renderPage();
