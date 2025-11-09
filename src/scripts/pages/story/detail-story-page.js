@@ -31,13 +31,27 @@ export default class DetailStoryPage {
 
     if (!(s.lat && s.lon)) return;
 
-    const map = L.map('detail-map').setView([s.lat, s.lon], 13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    // --- MAP DETAIL ---
+    const map = L.map('detail-map', {
+      minZoom: 2,
+      maxZoom: 16,
+      maxBounds: [[85, -180], [-85, 180]],
+      maxBoundsViscosity: 1.0,
+      zoomControl: true,
+      scrollWheelZoom: true,
+    }).setView([s.lat, s.lon], 13);
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      noWrap: true,
+      continuousWorld: false,
       maxZoom: 18,
       detectRetina: true,
+      attribution: '&copy; OpenStreetMap contributors',
     }).addTo(map);
 
-    L.marker([s.lat, s.lon]).addTo(map).bindPopup(s.description);
+    L.marker([s.lat, s.lon]).addTo(map).bindPopup(`
+      <b>${s.name}</b><br>${s.description}
+    `);
 
     setTimeout(() => map.invalidateSize(), 300);
   }

@@ -2,6 +2,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { getAllStories } from '../../data/api.js';
 import { formatDate } from '../../utils/time.js';
+import { deleteStory } from "../../data/indexeddb.js";
 
 export default class HomePage {
   async render() {
@@ -31,25 +32,31 @@ export default class HomePage {
 
     reloadLabel.textContent = `Last reload: ${new Date().toLocaleString('id-ID')} (${source === "online" ? "🌍 Online API" : "💾 Offline Cache"})`;
 
-
-    // 🌐 Update UI: online / offline status
-    function updateNetworkState() {
-      netStatus.textContent = navigator.onLine ? "Online ✅" : "Offline ⚠";
-      netStatus.style.color = navigator.onLine ? "green" : "red";
-    }
-    updateNetworkState();
-    window.addEventListener('online', updateNetworkState);
-    window.addEventListener('offline', updateNetworkState);
-
     list.innerHTML = '';
 
-    // 🌍 MAP
-    const map = L.map(mapContainer).setView([-2.5, 118], 5);
+    // --- MAP DETAIL ---
+    const map = L.map('detail-map', {
+      minZoom: 2,
+      maxZoom: 16,
+      maxBounds: [[85, -180], [-85, 180]],
+      maxBoundsViscosity: 1.0,
+    }).setView([s.lat, s.lon], 13);
 
-    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
-    const topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png');
+    const osm = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      detectRetina: true,
+      attribution: '&copy; OpenStreetMap contributors',
+    }).addTo(map);
+
+    const topo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenTopoMap contributors',
+    });
 
     L.control.layers({ OSM: osm, Topografi: topo }).addTo(map);
+
+    L.marker([s.lat, s.lon]).addTo(map).bindPopup(`
+      <b>${s.name}</b><br>${s.description}
+    `);
+
     setTimeout(() => map.invalidateSize(), 300);
 
     if (!stories.length) {
@@ -74,6 +81,15 @@ export default class HomePage {
         }
         <br>
         <a href="#/story/${s.id}">Lihat Detail</a>
+        <button class="delete-local-btn" data-id="${s.id}" style="
+      background:#dc3545;
+      padding:6px 10px;
+      border-radius:8px;
+      color:white;
+      border:none;
+      margin-top:6px;
+      cursor:pointer;
+    ">Hapus Lokal</button>
       `;
 
       list.appendChild(article);
@@ -82,6 +98,14 @@ export default class HomePage {
         const marker = L.marker([s.lat, s.lon]).addTo(map);
         marker.bindPopup(`<b>${s.name}</b><br>${s.description}`);
       }
+    });
+
+    document.querySelectorAll(".delete-local-btn").forEach(btn => {
+      btn.addEventListener("click", async () => {
+        await deleteStory(btn.dataset.id);
+        alert("✅ Data berhasil dihapus dari cache lokal");
+        location.reload();
+      });
     });
 
     const bounds = L.latLngBounds(

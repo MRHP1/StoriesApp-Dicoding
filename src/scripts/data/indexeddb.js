@@ -24,3 +24,8 @@ export async function getAllStoredStories() {
   const db = await getDB();
   return await db.getAll(STORE_NAME);
 }
+
+export async function deleteStory(id) {
+  const db = await dbPromise;
+  return db.delete(STORE_NAME, id);
+}

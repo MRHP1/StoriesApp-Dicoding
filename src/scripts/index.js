@@ -38,12 +38,6 @@ async function renderPushButton() {
       return;
     }
 
-    if (await isSubscribed()) {
-      await unsubscribePush();
-    } else {
-      await subscribePush();
-    }
-
     renderPushButton();
   };
 }
