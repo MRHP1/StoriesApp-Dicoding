@@ -36,25 +36,14 @@ self.addEventListener('activate', (event) => {
 
 // ---- FETCH ----
 self.addEventListener('fetch', (event) => {
-  const requestUrl = event.request.url;
+  const url = new URL(event.request.url);
+  if (url.host.includes('story-api.dicoding.dev')) return; // jangan intercept API
 
-  // ✅ DO NOT CACHE API REQUESTS (important)
-  if (requestUrl.includes('story-api.dicoding.dev')) {
-    return; // let network handle API requests
-  }
-
-  // ✅ Cache-first for static resources
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return (
-        cached ||
-        fetch(event.request).catch(() => {
-          // Optional: Fallback if offline page needed
-        })
-      );
-    })
+    caches.match(event.request).then((cached) => cached || fetch(event.request))
   );
 });
+
 
 // ---- PUSH NOTIFICATION ----
 self.addEventListener('push', (event) => {

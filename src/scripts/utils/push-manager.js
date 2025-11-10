@@ -5,72 +5,70 @@ function urlBase64ToUint8Array(base64) {
   const padding = "=".repeat((4 - (base64.length % 4)) % 4);
   const base64Safe = (base64 + padding).replace(/-/g, "+").replace(/_/g, "/");
   const raw = window.atob(base64Safe);
-  const output = new Uint8Array(raw.length);
-  for (let i = 0; i < raw.length; ++i) output[i] = raw.charCodeAt(i);
-  return output;
+  const out = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; ++i) out[i] = raw.charCodeAt(i);
+  return out;
 }
 
 export async function isSubscribed() {
+  if (!('serviceWorker' in navigator)) return false;
   const reg = await navigator.serviceWorker.ready;
-  return Boolean(await reg.pushManager.getSubscription());
+  const sub = await reg.pushManager.getSubscription();
+  return Boolean(sub);
 }
 
 export async function subscribePush() {
   const reg = await navigator.serviceWorker.ready;
 
-  const subscription = await reg.pushManager.subscribe({
+  const sub = await reg.pushManager.subscribe({
     userVisibleOnly: true,
     applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
   });
 
-  console.log("📌 Browser Subscription:", subscription);
-
   const token = localStorage.getItem("token");
-  if (!token) return;
+  if (!token) {
+    console.warn("No token; skip server subscribe");
+    return sub;
+  }
 
-  const sub = subscription.toJSON();
-
+  const json = sub.toJSON();
   const payload = {
-    endpoint: sub.endpoint,
+    endpoint: json.endpoint,
     keys: {
-      auth: sub.keys.auth,
-      p256dh: sub.keys.p256dh
-    }
+      auth: json.keys?.auth,
+      p256dh: json.keys?.p256dh,
+    },
   };
 
-  await fetch("https://story-api.dicoding.dev/v1/notifications/subscribe", {
+  const res = await fetch("https://story-api.dicoding.dev/v1/notifications/subscribe", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
     body: JSON.stringify(payload),
   });
 
-  alert("✅ Notifikasi diaktifkan");
+  if (!res.ok) {
+    console.error("Subscribe API failed:", await res.text());
+    await sub.unsubscribe();
+    throw new Error("Gagal mendaftar notifikasi ke server.");
+  }
+
+  return sub;
 }
 
 export async function unsubscribePush() {
   const reg = await navigator.serviceWorker.ready;
-  const subscription = await reg.pushManager.getSubscription();
+  const sub = await reg.pushManager.getSubscription();
+  if (!sub) return;
+
   const token = localStorage.getItem("token");
+  if (token) {
+    const res = await fetch("https://story-api.dicoding.dev/v1/notifications/subscribe", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ endpoint: sub.endpoint }),
+    });
+    if (!res.ok) console.error("Unsubscribe API failed:", await res.text());
+  }
 
-  if (!subscription) return;
-
-  const payload = { endpoint: subscription.endpoint };
-
-  const res = await fetch("https://story-api.dicoding.dev/v1/notifications/subscribe", {
-    method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`,
-    },
-    body: JSON.stringify(payload),
-  });
-
-  console.log("🔻 Response DELETE:", await res.json());
-
-  await subscription.unsubscribe();
-  alert("🚫 Notifikasi dimatikan");
+   await sub.unsubscribe();
 }
-

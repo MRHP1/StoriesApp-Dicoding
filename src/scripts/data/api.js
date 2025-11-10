@@ -1,8 +1,7 @@
 import CONFIG from '../config.js';
 import { showLoader, hideLoader } from '../utils/index.js';
-import { saveStories, getAllStoredStories } from './indexeddb.js';
+import { getAllSavedStories } from './indexeddb.js'; // ✅ pakai user-saved only
 
-// ---------- AUTH ----------
 export async function registerUser(name, email, password) {
   try {
     showLoader();
@@ -31,7 +30,6 @@ export async function loginUser(email, password) {
   }
 }
 
-// ---------- STORIES ----------
 export async function getAllStories() {
   const token = localStorage.getItem('token');
 
@@ -42,19 +40,16 @@ export async function getAllStories() {
 
     const json = await res.json();
 
-    if (!json.error && json.listStory) {
-      await saveStories(json.listStory); // ✅ simpan ke IndexedDB
-      return { source: "online", stories: json.listStory };
+    if (!json.error && Array.isArray(json.listStory)) {
+      return { source: 'online', stories: json.listStory };
     }
-
   } catch (err) {
-    console.warn("⚠ Offline: mengambil dari IndexedDB");
+    console.warn('⚠ Offline: fallback ke saved stories (user-driven)');
   }
 
-  const stored = await getAllStoredStories();
-  return { source: "offline", stories: stored };
+  const saved = await getAllSavedStories();
+  return { source: 'offline', stories: saved || [] };
 }
-
 
 export async function getStoryDetail(id) {
   try {

@@ -17,29 +17,46 @@ async function renderPushButton() {
     return;
   }
 
-  const registration = await navigator.serviceWorker.ready;
-
+  await navigator.serviceWorker.ready;
   const subscribed = await isSubscribed();
 
   pushSection.innerHTML = `
-    <button id="push-toggle-btn" class="logout-btn">
+    <button id="push-toggle-btn" class="logout-btn" aria-pressed="${subscribed}">
       ${subscribed ? 'Disable Notification' : 'Enable Notification'}
     </button>
   `;
 
-  document.getElementById('push-toggle-btn').onclick = async () => {
+  const btn = document.getElementById('push-toggle-btn');
+  btn.onclick = async () => {
+    btn.disabled = true;
+
     if (Notification.permission === 'default') {
       await Notification.requestPermission();
     }
-
     if (Notification.permission !== 'granted') {
       alert('Izin notifikasi ditolak oleh pengguna.');
+      btn.disabled = false;
       return;
     }
 
-    renderPushButton();
+    try {
+      if (await isSubscribed()) {
+        await unsubscribePush();
+        alert('🚫 Notifikasi dimatikan');
+      } else {
+        await subscribePush();
+        alert('✅ Notifikasi diaktifkan');
+      }
+    } catch (e) {
+      console.error(e);
+      alert('Gagal mengubah status notifikasi.');
+    } finally {
+      btn.disabled = false;
+      renderPushButton();
+    }
   };
 }
+
 
 
 document.addEventListener('DOMContentLoaded', async () => {
